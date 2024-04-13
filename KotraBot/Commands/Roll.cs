@@ -40,14 +40,14 @@ namespace KotraBot.Commands
                 titleline.Append($"D12");
                 foreach (var roll in results.Where(r => r.size == 12))
                 {
-                    middleline.Append($"{roll.result.ToString().PadLeft(2)} ");
-                    bottomline.Append($"{roll.index.ToString().PadLeft(2)} ");
+                    middleline.Append($"{roll.result.ToString().PadRight(2)} ");
+                    bottomline.Append($"{roll.index.ToString().PadRight(2)} ");
                 }
                 middleline.Append("    ");
                 bottomline.Append("    ");
             }
 
-            int tmp = middleline.Length - titleline.Length;
+            int tmp = middleline.Length - titleline.Length - 1;
             titleline.Append(new string(' ', tmp));
 
             if (results.Any(r => r.size == 8))
@@ -55,13 +55,13 @@ namespace KotraBot.Commands
                 titleline.Append("|D8");
                 foreach (var roll in results.Where(r => r.size == 8))
                 {
-                    middleline.Append($"{roll.result.ToString().PadLeft(2)} ");
-                    bottomline.Append($"{roll.index.ToString().PadLeft(2)} ");
+                    middleline.Append($"{roll.result.ToString().PadRight(2)} ");
+                    bottomline.Append($"{roll.index.ToString().PadRight(2)} ");
                 }
                 middleline.Append("    ");
                 bottomline.Append("    ");
             }
-            tmp = middleline.Length - titleline.Length;
+            tmp = middleline.Length - titleline.Length - 1;
             titleline.Append(new string(' ', tmp));
 
             if (results.Any(r => r.size == 6))
@@ -69,13 +69,13 @@ namespace KotraBot.Commands
                 titleline.Append("|D6");
                 foreach (var roll in results.Where(r => r.size == 6))
                 {
-                    middleline.Append($"{roll.result.ToString().PadLeft(2)} ");
-                    bottomline.Append($"{roll.index.ToString().PadLeft(2)} ");
+                    middleline.Append($"{roll.result.ToString().PadRight(2)} ");
+                    bottomline.Append($"{roll.index.ToString().PadRight(2)} ");
                 }
                 middleline.Append("    ");
                 bottomline.Append("    ");
             }
-            tmp = middleline.Length - titleline.Length;
+            tmp = middleline.Length - titleline.Length - 1;
             titleline.Append(new string(' ', tmp));
 
             if (results.Any(r => r.size == 4))
@@ -83,20 +83,21 @@ namespace KotraBot.Commands
                 titleline.Append("|D4");
                 foreach (var roll in results.Where(r => r.size == 4))
                 {
-                    middleline.Append($"{roll.result.ToString().PadLeft(2)} ");
-                    bottomline.Append($"{roll.index.ToString().PadLeft(2)} ");
+                    middleline.Append($"{roll.result.ToString().PadRight(2)} ");
+                    bottomline.Append($"{roll.index.ToString().PadRight(2)} ");
                 }
                 middleline.Append("    ");
                 bottomline.Append("    ");
             }
-            tmp = middleline.Length - titleline.Length;
+            tmp = middleline.Length - titleline.Length - 1;
             titleline.Append(new string(' ', tmp));
 
+            message += "```c#\n";
             message += titleline.ToString() + "\n";
-            message += middleline.ToString() + " risulatati \n";
+            message += middleline.ToString() + " risultati \n";
             message += bottomline.ToString() + " indici \n";
 
-            message += "\n\n";
+            message += "```\n";
         }
 
         protected DiceRoll RollDice(DicePool pool)
@@ -309,7 +310,7 @@ namespace KotraBot.Commands
                 message = "Risultato: Fallimento!\n\n";
             }
 
-            message += "Risultati\n\n";
+            message += "Risultati\n";
 
 
             results = results.OrderByDescending(x => x.size).ThenByDescending(x => x.result).ToArray();
