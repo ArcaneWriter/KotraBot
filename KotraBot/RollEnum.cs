@@ -8,10 +8,10 @@ namespace KotraBot
 {
     public struct DicePool
     {
-        public int D12;
-        public int D8;
-        public int Difficulty;
-        public int Traits;
+        public int d12;
+        public int d8;
+        public int difficulty;
+        public int traits;
     }
 
     public struct DiceResult

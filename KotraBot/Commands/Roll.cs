@@ -101,10 +101,10 @@ namespace KotraBot.Commands
 
         protected DiceRoll RollDice(DicePool pool)
         {
-            int d12 = pool.D12;
-            int d8 = pool.D8;
-            int difficulty = pool.Difficulty;
-            int traits = pool.Traits;
+            int d12 = pool.d12;
+            int d8 = pool.d8;
+            int difficulty = pool.difficulty;
+            int traits = pool.traits;
 
 
             if (d12 > 6) d12 = 6; // d12 cap
@@ -274,13 +274,13 @@ namespace KotraBot.Commands
             return diceRoll;
         }
 
-        public static string ElaborateResults(ref DiceRoll RollResult)
+        public static string ElaborateResults(ref DiceRoll rollResult)
         {
-            var results = RollResult.results;
-            var success1 = RollResult.success1;
-            var success2 = RollResult.success2;
-            var triumph = RollResult.triumph;
-            var disaster = RollResult.disaster;
+            var results = rollResult.results;
+            var success1 = rollResult.success1;
+            var success2 = rollResult.success2;
+            var triumph = rollResult.triumph;
+            var disaster = rollResult.disaster;
 
             string message = "";
             if (success1 && success2)
@@ -344,27 +344,27 @@ namespace KotraBot.Commands
 
                 DicePool pool = new DicePool
                 {
-                    D12 = d12,
-                    D8 = d8,
-                    Difficulty = difficulty,
-                    Traits = traits
+                    d12 = d12,
+                    d8 = d8,
+                    difficulty = difficulty,
+                    traits = traits
                 };
 
-                var RollResult = RollDice(pool);
+                var rollResult = RollDice(pool);
 
-                string message = ElaborateResults(ref RollResult);
+                string message = ElaborateResults(ref rollResult);
                 await ReplyAsync(message);
 
                 var diceRoll = new DiceRoll
                 {
                     pool = new DicePool
                     {
-                        D12 = d12,
-                        D8 = d8,
-                        Difficulty = difficulty,
-                        Traits = traits
+                        d12 = d12,
+                        d8 = d8,
+                        difficulty = difficulty,
+                        traits = traits
                     },
-                    results = RollResult.results
+                    results = rollResult.results
                 };
 
                 Cache.SetCache(Context.Message.Author.Id ,diceRoll);
@@ -404,14 +404,14 @@ namespace KotraBot.Commands
                 if (line.Trim().ToLower() == "all")
                 {
                     var pool = lastRoll.Value.pool;
-                    var RollResult = RollDice(pool);
-                    string message = ElaborateResults(ref RollResult);
+                    var rollResult = RollDice(pool);
+                    string message = ElaborateResults(ref rollResult);
                     await ReplyAsync(message);
 
                     var diceRoll = new DiceRoll
                     {
                         pool = pool,
-                        results = RollResult.results
+                        results = rollResult.results
                     };
 
                     Cache.SetCache(Context.Message.Author.Id, diceRoll);
@@ -491,12 +491,12 @@ namespace KotraBot.Commands
                     int[] d4results = newResults.Where(x => x.size == 4).Select(x => x.result).ToArray();
 
                     DiceRoll dRoll = lastRoll.Value;
-                    var RollResult = CalculateResults(ref d12results, ref d8results, ref d6results, ref d4results, ref newResults, ref dRoll.pool);
+                    var rollResult = CalculateResults(ref d12results, ref d8results, ref d6results, ref d4results, ref newResults, ref dRoll.pool);
 
-                    string message = ElaborateResults(ref RollResult);
+                    string message = ElaborateResults(ref rollResult);
                     await ReplyAsync(message);
 
-                    Cache.SetCache(Context.Message.Author.Id, RollResult);
+                    Cache.SetCache(Context.Message.Author.Id, rollResult);
                 }
             }
             catch (Exception ex)

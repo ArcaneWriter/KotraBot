@@ -14,9 +14,9 @@ namespace KotraBot.Commands
         [Command("add")]
         public async Task ExecuteAsync([Remainder][Discord.Commands.Summary("pool")] string line)
         {
-            var RollResult =  Cache.GetCache(Context.Message.Author.Id);
+            var rollResult =  Cache.GetCache(Context.Message.Author.Id);
 
-            if (RollResult is null)
+            if (rollResult is null)
             {
                 await ReplyAsync("No valid last roll found to add bonus\n roll a new pool");
                 return;
@@ -68,13 +68,13 @@ namespace KotraBot.Commands
                     return;
                 }
 
-                for (int i = 0; i < RollResult.Value.results.Length; ++i)
+                for (int i = 0; i < rollResult.Value.results.Length; ++i)
                 {
-                    int index = RollResult.Value.results[i].index;
-                    if (indexes.Contains(index)) RollResult.Value.results[i].result += bonus;
+                    int index = rollResult.Value.results[i].index;
+                    if (indexes.Contains(index)) rollResult.Value.results[i].result += bonus;
                 }
 
-                var res = RollResult.Value;
+                var res = rollResult.Value;
 
                 int[] d12Results = res.results.Where(x => x.size == 12).Select(x => x.result).ToArray();
                 int[] d8Results = res.results.Where(x => x.size == 8).Select(x => x.result).ToArray();
@@ -85,7 +85,7 @@ namespace KotraBot.Commands
 
                 var diceRoll = RollBase.CalculateResults(ref d12Results, ref d8Results, ref d6Results, ref d4Results, ref results, ref pool);
                 string message = RollBase.ElaborateResults(ref diceRoll);
-                RollResult = diceRoll;
+                rollResult = diceRoll;
                 await ReplyAsync(message);
 
                 Cache.SetCache(Context.Message.Author.Id, diceRoll); // update cache

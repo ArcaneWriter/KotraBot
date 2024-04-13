@@ -12,8 +12,8 @@ namespace KotraBot
 {
     public static class Cache
     {
-        public static ConcurrentDictionary<ulong, DiceRoll> LastRolls = new ConcurrentDictionary<ulong, DiceRoll>(); // user id -> dice pool for caching
-        public static ConcurrentDictionary<ulong, DateTime> LastRollsTime = new ConcurrentDictionary<ulong, DateTime>(); // user id -> last roll time for caching expiration
+        public static ConcurrentDictionary<ulong, DiceRoll> lastRolls = new ConcurrentDictionary<ulong, DiceRoll>(); // user id -> dice pool for caching
+        public static ConcurrentDictionary<ulong, DateTime> lastRollsTime = new ConcurrentDictionary<ulong, DateTime>(); // user id -> last roll time for caching expiration
 
         /// <summary>
         /// this method is used to invalidate cache if it's older than 10 minutes
@@ -22,13 +22,13 @@ namespace KotraBot
         /// <returns></returns>
         public static bool TryInvalidateCache(ulong userId)
         {
-            if (LastRollsTime.ContainsKey(userId))
+            if (lastRollsTime.ContainsKey(userId))
             {
-                if (DateTime.UtcNow - LastRollsTime[userId] > TimeSpan.FromMinutes(10))
+                if (DateTime.UtcNow - lastRollsTime[userId] > TimeSpan.FromMinutes(10))
                 {
                     //cache expired
-                    LastRollsTime.TryRemove(userId, out _);
-                    LastRolls.TryRemove(userId, out _);
+                    lastRollsTime.TryRemove(userId, out _);
+                    lastRolls.TryRemove(userId, out _);
                     return true;
                 }
             }
@@ -37,10 +37,10 @@ namespace KotraBot
 
         public static bool InvalidateCache(ulong userId)
         {
-            if (LastRollsTime.ContainsKey(userId))
+            if (lastRollsTime.ContainsKey(userId))
             {
-                bool @try = LastRollsTime.TryRemove(userId, out _);
-                LastRolls.TryRemove(userId, out _);
+                bool @try = lastRollsTime.TryRemove(userId, out _);
+                lastRolls.TryRemove(userId, out _);
                 return @try;
             }
             return true;
@@ -48,24 +48,24 @@ namespace KotraBot
 
         public static void SetCache(ulong userId, DiceRoll diceRoll)
         {
-            if (LastRolls.ContainsKey(userId))
+            if (lastRolls.ContainsKey(userId))
             {
-                LastRolls[userId] = diceRoll;
-                LastRollsTime[userId] = DateTime.UtcNow;
+                lastRolls[userId] = diceRoll;
+                lastRollsTime[userId] = DateTime.UtcNow;
             }
             else
             {
-                LastRolls.TryAdd(userId, diceRoll);
-                LastRollsTime.TryAdd(userId, DateTime.UtcNow);
+                lastRolls.TryAdd(userId, diceRoll);
+                lastRollsTime.TryAdd(userId, DateTime.UtcNow);
             }
         }
 
         public static DiceRoll? GetCache(ulong userId)
         {
             TryInvalidateCache(userId);
-            if (LastRolls.ContainsKey(userId))
+            if (lastRolls.ContainsKey(userId))
             {
-                return LastRolls[userId];
+                return lastRolls[userId];
             }
             else
             {
@@ -86,7 +86,7 @@ namespace KotraBot
         [Command("invalidate")]
         public async Task InvalidateCache([Remainder] string line)
         {
-            if (!Admin.isAdmin(Context.Message.Author.Id))
+            if (!Admin.IsAdmin(Context.Message.Author.Id))
             {
                 await ReplyAsync("You are not authorized to use this command");
                 return;
