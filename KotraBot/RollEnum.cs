@@ -12,6 +12,7 @@ namespace KotraBot
         public int d8;
         public int difficulty;
         public int traits;
+        public bool @override;
     }
 
     public struct DiceResult

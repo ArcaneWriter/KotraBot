@@ -105,6 +105,7 @@ namespace KotraBot.Commands
             int d8 = pool.d8;
             int difficulty = pool.difficulty;
             int traits = pool.traits;
+            bool _override = pool.@override;
 
 
             if (d12 > 6) d12 = 6; // d12 cap
@@ -215,7 +216,7 @@ namespace KotraBot.Commands
                 indexer++;
             }
 
-            return CalculateResults(ref d12Results, ref d8Results, ref d6Results, ref d4Results, ref results, ref pool);
+            return CalculateResults(ref d12Results, ref d8Results, ref d6Results, ref d4Results, ref results, ref pool, pool.@override);
         }
 
         /// <summary>
@@ -228,7 +229,7 @@ namespace KotraBot.Commands
         /// <param name="results"></param>
         /// <param name="pool"></param>
         /// <returns></returns>
-        public static DiceRoll CalculateResults(ref int[] d12Results, ref int[] d8Results, ref int[] d6Results, ref int[] d4Results, ref DiceResult[] results, ref DicePool pool)
+        public static DiceRoll CalculateResults(ref int[] d12Results, ref int[] d8Results, ref int[] d6Results, ref int[] d4Results, ref DiceResult[] results, ref DicePool pool, bool _override)
         {
             //detailed explanation of what happens to calculate results
             // 1. get the max value of the positive dices
@@ -255,11 +256,23 @@ namespace KotraBot.Commands
             bool success1 = positiveDiceMax >= 6;
             bool success2 = negativeDiceMax >= 6;
 
-            var positiveResults = d12Results.Concat(d8Results).ToArray();
-            int triumph = positiveResults.Count(x => x == 12);
-            
-            var negativeResults = d6Results.Concat(d4Results).ToArray();
-            int disaster = negativeResults.Count(x => x == 1);
+            int triumph = 0;
+            int disaster = 0;
+
+            if (!_override)
+            {
+                var positiveResults = d12Results.Concat(d8Results).ToArray();
+                triumph = positiveResults.Count(x => x == 12);
+
+                var negativeResults = d6Results.Concat(d4Results).ToArray();
+                disaster = negativeResults.Count(x => x == 1);
+            }
+            else
+            {
+                //in override mode we calculate the triumphs and disasters from the results
+                triumph = results.Where(r => r.result >= 6).Count();
+                disaster = results.Where(r => r.result < 6).Count();
+            }
 
             var diceRoll = new DiceRoll
             {
@@ -341,13 +354,18 @@ namespace KotraBot.Commands
                 int d8 = int.Parse(strings[1]);
                 int difficulty = int.Parse(strings[2]);
                 int traits = int.Parse(strings[3]);
+                
+                string fithArg = strings.Length > 4 ? strings[4].Trim() : "false";
+                bool _override = fithArg.ToBool();
+
 
                 DicePool pool = new DicePool
                 {
                     d12 = d12,
                     d8 = d8,
                     difficulty = difficulty,
-                    traits = traits
+                    traits = traits,
+                    @override = _override
                 };
 
                 var rollResult = RollDice(pool);
@@ -357,13 +375,7 @@ namespace KotraBot.Commands
 
                 var diceRoll = new DiceRoll
                 {
-                    pool = new DicePool
-                    {
-                        d12 = d12,
-                        d8 = d8,
-                        difficulty = difficulty,
-                        traits = traits
-                    },
+                    pool = pool,
                     results = rollResult.results
                 };
 
@@ -491,7 +503,7 @@ namespace KotraBot.Commands
                     int[] d4results = newResults.Where(x => x.size == 4).Select(x => x.result).ToArray();
 
                     DiceRoll dRoll = lastRoll.Value;
-                    var rollResult = CalculateResults(ref d12results, ref d8results, ref d6results, ref d4results, ref newResults, ref dRoll.pool);
+                    var rollResult = CalculateResults(ref d12results, ref d8results, ref d6results, ref d4results, ref newResults, ref dRoll.pool, dRoll.pool.@override);
 
                     string message = ElaborateResults(ref rollResult);
                     await ReplyAsync(message);

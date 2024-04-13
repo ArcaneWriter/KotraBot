@@ -83,7 +83,7 @@ namespace KotraBot.Commands
                 DiceResult[] results = res.results;
                 DicePool pool = res.pool;
 
-                var diceRoll = RollBase.CalculateResults(ref d12Results, ref d8Results, ref d6Results, ref d4Results, ref results, ref pool);
+                var diceRoll = RollBase.CalculateResults(ref d12Results, ref d8Results, ref d6Results, ref d4Results, ref results, ref pool, pool.@override);
                 string message = RollBase.ElaborateResults(ref diceRoll);
                 rollResult = diceRoll;
                 await ReplyAsync(message);
