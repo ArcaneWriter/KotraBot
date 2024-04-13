@@ -86,6 +86,13 @@ namespace KotraBot
         [Command("invalidate")]
         public async Task InvalidateCache([Remainder] string line)
         {
+            if (!Admin.isAdmin(Context.Message.Author.Id))
+            {
+                await ReplyAsync("You are not authorized to use this command");
+                return;
+            }
+
+
             if (string.IsNullOrWhiteSpace(line))
             {
                 await ReplyAsync("Please provide a user id to invalidate cache for");

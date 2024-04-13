@@ -9,164 +9,86 @@ using System.Threading.Tasks;
 
 namespace KotraBot.Commands
 {
-    public struct DicePool
-    {
-        public int D12;
-        public int D8;
-        public int Difficulty;
-        public int Traits;
-    }
 
-    public struct DiceResult
-    {
-        public int index;
-        public int size;
-        public int result;
-    }
-
-    public struct DiceRoll
-    {
-        public DicePool pool;
-        public DiceResult[] results;
-        public int triumph;
-        public int disaster;
-        public bool success1;
-        public bool success2;
-    }
-
-    
-    public class Roll : RollBase
-    {
-
-        [Command("roll")]
-        public async Task ExecuteAsync([Remainder][Discord.Commands.Summary("pool")] string line)
-        {
-            Cache.TryInvalidateCache(Context.Message.Author.Id);
-
-            if (string.IsNullOrEmpty(line))
-            {
-                await ReplyAsync("not enough params");
-                return;
-            }
-
-            //its time for some logic
-            //i need d12 + d8 + difficulty + traits + special d12 to not scale, so 5  
-
-            string[] strings = line.Split(' ');
-            if (strings.Length < 4)
-            {
-                await ReplyAsync("not enoght params");
-                return;
-            }
-
-            try
-            {
-                //get input
-                int d12 = int.Parse(strings[0]);
-                int d8 = int.Parse(strings[1]);
-                int difficulty = int.Parse(strings[2]);
-                int traits = int.Parse(strings[3]);
-
-                DicePool pool = new DicePool
-                {
-                    D12 = d12,
-                    D8 = d8,
-                    Difficulty = difficulty,
-                    Traits = traits
-                };
-
-                var RollResult = RollDice(pool);
-
-                string message = ElaborateResults(ref RollResult);
-                await ReplyAsync(message);
-
-                var diceRoll = new DiceRoll
-                {
-                    pool = new DicePool
-                    {
-                        D12 = d12,
-                        D8 = d8,
-                        Difficulty = difficulty,
-                        Traits = traits
-                    },
-                    results = RollResult.results
-                };
-
-                Cache.SetCache(Context.Message.Author.Id ,diceRoll);
-            }
-            catch (Exception ex)
-            {
-                await ReplyAsync("Unexpected Error");
-                Console.WriteLine(ex.Message);
-            }
-        }
-
-
-
-    }
 
     public class RollBase : ModuleBase<SocketCommandContext>
     {
-        protected void RemoveFromFirstThenSecond(ref int a, ref int b, int amountToRemove)
+        protected void RemoveFromFirstThenSecond(ref int a, ref int b, int amountToRemove, out int bin)
         {
             a = a - amountToRemove;
+            bin = 0;
             if (a < 0)
             {
                 b = b + a;
                 a = 0;
-                if (b < 0) b = 0;
+                if (b < 0)
+                {
+                    bin = Math.Abs(b); // how couldn't be removed
+                    b = 0;
+                }
             }
         }
 
-        protected void FormatResultTable(DiceResult[] results, ref string message)
+        protected static void FormatResultTable(DiceResult[] results, ref string message)
         {
             var titleline = new StringBuilder();
             var middleline = new StringBuilder();
             var bottomline = new StringBuilder();
 
-            titleline.Append($"D12");
-            foreach (var roll in results.Where(r => r.size == 12))
+            if (results.Any(r => r.size == 12))
             {
-                middleline.Append($"{roll.result.ToString().PadLeft(2)} ");
-                bottomline.Append($"{roll.index.ToString().PadLeft(2)} ");
+                titleline.Append($"D12");
+                foreach (var roll in results.Where(r => r.size == 12))
+                {
+                    middleline.Append($"{roll.result.ToString().PadLeft(2)} ");
+                    bottomline.Append($"{roll.index.ToString().PadLeft(2)} ");
+                }
+                middleline.Append("    ");
+                bottomline.Append("    ");
             }
-            middleline.Append("    ");
-            bottomline.Append("    ");
 
             int tmp = middleline.Length - titleline.Length;
             titleline.Append(new string(' ', tmp));
 
-            titleline.Append("|D8");
-            foreach (var roll in results.Where(r => r.size == 8))
+            if (results.Any(r => r.size == 8))
             {
-                middleline.Append($"{roll.result.ToString().PadLeft(2)} ");
-                bottomline.Append($"{roll.index.ToString().PadLeft(2)} ");
+                titleline.Append("|D8");
+                foreach (var roll in results.Where(r => r.size == 8))
+                {
+                    middleline.Append($"{roll.result.ToString().PadLeft(2)} ");
+                    bottomline.Append($"{roll.index.ToString().PadLeft(2)} ");
+                }
+                middleline.Append("    ");
+                bottomline.Append("    ");
             }
-            middleline.Append("    ");
-            bottomline.Append("    ");
             tmp = middleline.Length - titleline.Length;
             titleline.Append(new string(' ', tmp));
 
-            titleline.Append("|D6");
-            foreach (var roll in results.Where(r => r.size == 6))
+            if (results.Any(r => r.size == 6))
             {
-                middleline.Append($"{roll.result.ToString().PadLeft(2)} ");
-                bottomline.Append($"{roll.index.ToString().PadLeft(2)} ");
+                titleline.Append("|D6");
+                foreach (var roll in results.Where(r => r.size == 6))
+                {
+                    middleline.Append($"{roll.result.ToString().PadLeft(2)} ");
+                    bottomline.Append($"{roll.index.ToString().PadLeft(2)} ");
+                }
+                middleline.Append("    ");
+                bottomline.Append("    ");
             }
-            middleline.Append("    ");
-            bottomline.Append("    ");
             tmp = middleline.Length - titleline.Length;
-
             titleline.Append(new string(' ', tmp));
-            titleline.Append("|D4");
 
-            foreach (var roll in results.Where(r => r.size == 4))
+            if (results.Any(r => r.size == 4))
             {
-                middleline.Append($"{roll.result.ToString().PadLeft(2)} ");
-                bottomline.Append($"{roll.index.ToString().PadLeft(2)} ");
+                titleline.Append("|D4");
+                foreach (var roll in results.Where(r => r.size == 4))
+                {
+                    middleline.Append($"{roll.result.ToString().PadLeft(2)} ");
+                    bottomline.Append($"{roll.index.ToString().PadLeft(2)} ");
+                }
+                middleline.Append("    ");
+                bottomline.Append("    ");
             }
-            middleline.Append("    ");
-            bottomline.Append("    ");
             tmp = middleline.Length - titleline.Length;
             titleline.Append(new string(' ', tmp));
 
@@ -187,16 +109,19 @@ namespace KotraBot.Commands
 
             if (d12 > 6) d12 = 6; // d12 cap
             if (d8 > 6) d8 = 6; // d8 cap
+            if (difficulty > 6) difficulty = 6; // difficulty cap
 
             //remove from d12 and d8 first
-            RemoveFromFirstThenSecond(ref d8, ref d12, difficulty);
+            RemoveFromFirstThenSecond(ref d8, ref d12, difficulty, out int remainder);
 
             //calculate d6 and d4 pools total max of dice is 6
-            if (difficulty > 6) difficulty = 6; // difficulty cap
             if (traits > 6) traits = 6; // traits cap
 
-            int d6 = difficulty - traits;
+            int d6 = (difficulty - remainder) - traits; //todo get bin from Remove 
             int d4 = traits;
+
+            if (d6 < 0) d6 = 0;
+            if (d4 < 0) d4 = 0;
 
             while (d6 + d4 > 6)
             {
@@ -205,9 +130,6 @@ namespace KotraBot.Commands
                 else
                     d4--;
             }
-
-            if (d6 < 0) d6 = 0;
-            if (d4 < 0) d4 = 0;
 
             // roll dices
             var rnd = new Random();
@@ -296,9 +218,25 @@ namespace KotraBot.Commands
             return CalculateResults(ref d12Results, ref d8Results, ref d6Results, ref d4Results, ref results, ref pool);
         }
 
-        protected DiceRoll CalculateResults(ref int[] d12Results, ref int[] d8Results, ref int[] d6Results, ref int[] d4Results, ref DiceResult[] results, ref DicePool pool)
+        /// <summary>
+        /// Calculate the results of the dice rolls
+        /// </summary>
+        /// <param name="d12Results"></param>
+        /// <param name="d8Results"></param>
+        /// <param name="d6Results"></param>
+        /// <param name="d4Results"></param>
+        /// <param name="results"></param>
+        /// <param name="pool"></param>
+        /// <returns></returns>
+        public static DiceRoll CalculateResults(ref int[] d12Results, ref int[] d8Results, ref int[] d6Results, ref int[] d4Results, ref DiceResult[] results, ref DicePool pool)
         {
             //detailed explanation of what happens to calculate results
+            // 1. get the max value of the positive dices
+            // 2. get the max value of the negative dices
+            // 3. check if at least one dice is >= 6 for both the positive and negative dices
+            // 4. if only one of the two is >= 6 then it's a partial success, if both are >= 6 then it's a full success, else it's a failure
+            // 5. count the number of 12s in the positive dices, these are triumphs
+            // 6. count the number of 1s in the negative dices, these are disasters
 
             //positive dices
             int d12Max = d12Results.Length > 0 ? d12Results.Max() : 0;
@@ -317,8 +255,11 @@ namespace KotraBot.Commands
             bool success1 = positiveDiceMax >= 6;
             bool success2 = negativeDiceMax >= 6;
 
-            int triumph = d12Results.Count(x => x == 12);
-            int disaster = d4Results.Count(x => x == 1);
+            var positiveResults = d12Results.Concat(d8Results).ToArray();
+            int triumph = positiveResults.Count(x => x == 12);
+            
+            var negativeResults = d6Results.Concat(d4Results).ToArray();
+            int disaster = negativeResults.Count(x => x == 1);
 
             var diceRoll = new DiceRoll
             {
@@ -333,7 +274,7 @@ namespace KotraBot.Commands
             return diceRoll;
         }
 
-        protected string ElaborateResults(ref DiceRoll RollResult)
+        public static string ElaborateResults(ref DiceRoll RollResult)
         {
             var results = RollResult.results;
             var success1 = RollResult.success1;
@@ -367,6 +308,76 @@ namespace KotraBot.Commands
 
             return message;
         }
+    }
+
+    public class Roll : RollBase
+    {
+
+        [Command("roll")]
+        public async Task ExecuteAsync([Remainder][Discord.Commands.Summary("pool")] string line)
+        {
+            Cache.TryInvalidateCache(Context.Message.Author.Id);
+
+            if (string.IsNullOrEmpty(line))
+            {
+                await ReplyAsync("not enough params");
+                return;
+            }
+
+            //its time for some logic
+            //i need d12 + d8 + difficulty + traits + special d12 to not scale, so 5  
+
+            string[] strings = line.Split(' ');
+            if (strings.Length < 4)
+            {
+                await ReplyAsync("not enoght params");
+                return;
+            }
+
+            try
+            {
+                //get input
+                int d12 = int.Parse(strings[0]);
+                int d8 = int.Parse(strings[1]);
+                int difficulty = int.Parse(strings[2]);
+                int traits = int.Parse(strings[3]);
+
+                DicePool pool = new DicePool
+                {
+                    D12 = d12,
+                    D8 = d8,
+                    Difficulty = difficulty,
+                    Traits = traits
+                };
+
+                var RollResult = RollDice(pool);
+
+                string message = ElaborateResults(ref RollResult);
+                await ReplyAsync(message);
+
+                var diceRoll = new DiceRoll
+                {
+                    pool = new DicePool
+                    {
+                        D12 = d12,
+                        D8 = d8,
+                        Difficulty = difficulty,
+                        Traits = traits
+                    },
+                    results = RollResult.results
+                };
+
+                Cache.SetCache(Context.Message.Author.Id ,diceRoll);
+            }
+            catch (Exception ex)
+            {
+                await ReplyAsync("Unexpected Error");
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+
+
     }
 
     public class Reroll : RollBase

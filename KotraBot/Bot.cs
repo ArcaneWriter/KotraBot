@@ -34,6 +34,9 @@ namespace KotraBot
             this._logger = logger;
             this._configuration = configuration;
 
+            var adminIds = _configuration.GetSection("admins").Get<ulong[]>() ?? new ulong[0]; // get the admin ids from the configuration file
+            Admin.Init(adminIds);
+
             var config = new DiscordSocketConfig()
             {
                 GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.MessageContent
