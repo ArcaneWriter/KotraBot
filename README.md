@@ -34,4 +34,6 @@ dotnet run KotraBot.dll
 ```
 
 ## Important
-For the applcation to work you need to put a secrets.json at root level of the installation of the app, which need to be as the template one in the `templates` folder 
+For the applcation to work you need to put a secrets.json at root level of the installation of the app, which need to be as the template one in the `templates` folder,
+
+this is always true for linus, while for windows you could need to to put the file in %appdata%\Microsoft\usersecrets\\{APP-GUID}\secrets.json
