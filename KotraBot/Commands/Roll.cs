@@ -120,7 +120,7 @@ namespace KotraBot.Commands
             if (traits > 6) traits = 6; // traits cap
 
             int d6 = (difficulty - remainder) - traits; //todo get bin from Remove 
-            int d4 = traits;
+            int d4 = difficulty > traits ? traits : difficulty;
 
             if (d6 < 0) d6 = 0;
             if (d4 < 0) d4 = 0;
