@@ -101,7 +101,7 @@ namespace KotraBot
 
             Match? match = System.Text.RegularExpressions.Regex.Match(line, USER_ID_REGEX);
 
-            if (match is null)
+            if (match is null || match.Groups.Count <= 1) // no user id provided
             {
                 await ReplyAsync("Invalid user id provided");
                 return;
