@@ -260,19 +260,21 @@ namespace KotraBot.Commands
             int triumph = 0;
             int disaster = 0;
 
-            if (!_override)
-            {
+
                 var positiveResults = d12Results.Concat(d8Results).ToArray();
                 triumph = positiveResults.Count(x => x == 12);
 
                 var negativeResults = d6Results.Concat(d4Results).ToArray();
                 disaster = negativeResults.Count(x => x == 1);
-            }
-            else
+
+            if (_override)
             {
-                //in override mode we calculate the triumphs and disasters from the results
-                triumph = results.Where(r => r.result >= 6).Count();
-                disaster = results.Where(r => r.result < 6).Count();
+                //in override check you chekc also the success, a success equals a triumph else it's a disaster
+                triumph += success1 ? 1 : 0;
+                disaster += success1 ? 0 : 1;
+
+                triumph += success2 ? 1 : 0;
+                disaster += success2 ? 0 : 1;
             }
 
             var diceRoll = new DiceRoll
