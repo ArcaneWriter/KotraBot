@@ -354,7 +354,7 @@ namespace KotraBot.Commands
                 int d12 = int.Parse(strings[0]);
                 int d8 = int.Parse(strings[1]);
                 int difficulty = int.Parse(strings.Length >= 3 ? strings[2] : "0");
-                int traits = int.Parse(strings.Length >= 3 ? strings[3] : "0");
+                int traits = int.Parse(strings.Length >= 4 ? strings[3] : "0");
                 
                 string fithArg = strings.Length > 4 ? strings[4].Trim() : "false";
                 bool _override = fithArg.ToBool();
