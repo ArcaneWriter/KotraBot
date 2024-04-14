@@ -342,7 +342,7 @@ namespace KotraBot.Commands
             //i need d12 + d8 + difficulty + traits + special d12 to not scale, so 5  
 
             string[] strings = line.Split(' ');
-            if (strings.Length < 4)
+            if (strings.Length < 2)
             {
                 await ReplyAsync("not enoght params");
                 return;
@@ -353,8 +353,8 @@ namespace KotraBot.Commands
                 //get input
                 int d12 = int.Parse(strings[0]);
                 int d8 = int.Parse(strings[1]);
-                int difficulty = int.Parse(strings[2]);
-                int traits = int.Parse(strings[3]);
+                int difficulty = int.Parse(strings.Length >= 3 ? strings[2] : "0");
+                int traits = int.Parse(strings.Length >= 3 ? strings[3] : "0");
                 
                 string fithArg = strings.Length > 4 ? strings[4].Trim() : "false";
                 bool _override = fithArg.ToBool();

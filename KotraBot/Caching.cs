@@ -81,6 +81,9 @@ namespace KotraBot
     /// </summary>
     public class CacheController : ModuleBase<SocketCommandContext>
     {
+        /// <summary>
+        /// Regex to match user id in a string based on discord user id format
+        /// </summary>
         const string USER_ID_REGEX = @"<@!?(\d+)>";
 
         [Command("invalidate")]
@@ -103,7 +106,7 @@ namespace KotraBot
 
             if (match is null || match.Groups.Count <= 1) // no user id provided
             {
-                await ReplyAsync("Invalid user id provided");
+                await ReplyAsync("Invalid user id provided"); 
                 return;
             }
 
